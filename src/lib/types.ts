@@ -1,3 +1,5 @@
+import { Accessor, Setter } from "solid-js";
+
 export type ThemeConfig = {
   icon: string;
   browser_theme_color: string;
@@ -35,4 +37,6 @@ export type ThemeProviderProps = {
   styles?: any;
   themes?: ThemesConfigObject;
   menu_placement?: "ne" | "se" | "sw" | "nw";
+  updateTheme?: (value: string) => void | Setter<string>;
+  theme?: Accessor<string> | string;
 };

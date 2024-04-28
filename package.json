@@ -1,5 +1,5 @@
 {
-  "name": "solid-theme-provider",
+  "name": "@kifrud/solid-theme-provider",
   "description": "Lightweight and customizable theme handler for Solid JS",
   "author": "Jacob Kofron",
   "license": "MIT",

@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createMemo, createSignal, mergeProps } from "solid-js";
 import fallbackStyles from "./fallbacks.module.scss";
 import fallbackThemes from "./fallbacks.themes.json";
 import { SystemThemesObject, ThemeProviderProps, ThemesObject } from "./lib/types";
@@ -30,34 +30,40 @@ const calculate_variants = (name: string, value: string) => {
 };
 
 export function ThemeProvider(props: ThemeProviderProps) {
-  const prefix = props.prefix || "stp-";
+  const values = mergeProps({ theme: currentTheme, setTheme: setTheme }, props);
+
+  const theme = createMemo(() =>
+    typeof values.theme === "function" ? values.theme() : values.theme
+  );
+
+  const prefix = values.prefix || "stp-";
   const system_theme_config: SystemThemesObject =
-    props.themes?.system_theme_config || fallbackThemes.system_theme_config;
-  const themes: ThemesObject = props.themes?.themes || fallbackThemes.themes;
+    values.themes?.system_theme_config || fallbackThemes.system_theme_config;
+  const themes: ThemesObject = values.themes?.themes || fallbackThemes.themes;
   const themeKeys = Object.keys(themes);
   const hasSystemThemesObject =
-    props.themes && props.themes.hasOwnProperty(SYSTEM_THEME_CONFIG_KEY);
+    values.themes && values.themes.hasOwnProperty(SYSTEM_THEME_CONFIG_KEY);
   const systemThemesCorrect =
     hasSystemThemesObject &&
     system_theme_config.hasOwnProperty("dark") &&
     system_theme_config.hasOwnProperty("light") &&
     themes.hasOwnProperty(system_theme_config.dark) &&
     themes.hasOwnProperty(system_theme_config.light);
-  const styles = props.styles || fallbackStyles;
+  const styles = values.styles || fallbackStyles;
   const multiToggle = themeKeys.length > 2;
-  const menu_placement = props.menu_placement || "se";
-  const custom_variants = props.calculate_variants || calculate_variants;
+  const menu_placement = values.menu_placement || "se";
+  const custom_variants = values.calculate_variants || calculate_variants;
 
   const [dropdownOpen, setDropdownOpen] = createSignal(false);
   const [useSystem, setUseSystem] = createSignal(
-    props.default ? false : systemThemesCorrect ? true : false
+    values.default ? false : systemThemesCorrect ? true : false
   );
 
   const systemThemeIsDark = window.matchMedia("(prefers-color-scheme: dark)");
   // initialize the current theme
   createEffect(() => {
-    setTheme(
-      props.default ||
+    values.setTheme(
+      values.default ||
         (systemThemesCorrect
           ? systemThemeIsDark.matches
             ? system_theme_config.dark
@@ -69,8 +75,8 @@ export function ThemeProvider(props: ThemeProviderProps) {
   // otherTheme is used when the button is in toggle mode (only two themes configured)
   const [otherTheme, setOtherTheme] = createSignal(
     systemThemesCorrect
-      ? props.default
-        ? props.default == system_theme_config.dark
+      ? values.default
+        ? values.default == system_theme_config.dark
           ? system_theme_config.light
           : system_theme_config.dark
         : systemThemeIsDark.matches
@@ -93,8 +99,8 @@ export function ThemeProvider(props: ThemeProviderProps) {
         if (e.matches) {
           nextTheme = system_theme_config.dark;
         }
-        setOtherTheme(currentTheme());
-        setTheme(nextTheme);
+        setOtherTheme(theme());
+        values.setTheme(nextTheme);
       }
       if (e.matches) {
         setCurrentSystem(system_theme_config.dark);
@@ -120,7 +126,7 @@ export function ThemeProvider(props: ThemeProviderProps) {
       );
       if (!hasSystemThemesObject) {
         console.warn(`Your themes object is missing the '${SYSTEM_THEME_CONFIG_KEY}' property.`);
-        if (!props.default) {
+        if (!values.default) {
           console.warn(
             `Because you have omitted the '${SYSTEM_THEME_CONFIG_KEY}' object and have not provided a default theme via props; Theme toggling will utilize the first two themes in your themes object.`
           );
@@ -161,14 +167,11 @@ export function ThemeProvider(props: ThemeProviderProps) {
     // TODO: loop through properties of last theme and remove any that don't exist in the next theme
 
     // loop through the theme vars and inject them to the :root style element
-    Object.keys(themes[currentTheme()].vars).forEach(name => {
-      document.documentElement.style.setProperty(
-        "--" + prefix + name,
-        themes[currentTheme()].vars[name]
-      );
+    Object.keys(themes[theme()].vars).forEach(name => {
+      document.documentElement.style.setProperty("--" + prefix + name, themes[theme()].vars[name]);
 
       // calculate any variants and inject them to the :root style element
-      let variants = custom_variants(name, themes[currentTheme()].vars[name]);
+      let variants = custom_variants(name, themes[theme()].vars[name]);
       Object.keys(variants).forEach(variant => {
         document.documentElement.style.setProperty("--" + prefix + variant, variants[variant]);
       });
@@ -178,15 +181,15 @@ export function ThemeProvider(props: ThemeProviderProps) {
     // <meta name="theme-color" content="#FFFFFF"></meta>
     let theme_meta = document.querySelector('meta[name="theme-color"]');
     if (
-      themes[currentTheme()].hasOwnProperty("config") &&
-      themes[currentTheme()].config.hasOwnProperty("browser_theme_color")
+      themes[theme()].hasOwnProperty("config") &&
+      themes[theme()].config.hasOwnProperty("browser_theme_color")
     ) {
       if (!theme_meta) {
         theme_meta = document.createElement("meta");
         theme_meta.setAttribute("name", "theme-color");
         document.getElementsByTagName("head")[0].appendChild(theme_meta);
       }
-      theme_meta.setAttribute("content", themes[currentTheme()].config.browser_theme_color);
+      theme_meta.setAttribute("content", themes[theme()].config.browser_theme_color);
     } else {
       if (theme_meta) theme_meta.remove();
     }
@@ -194,15 +197,15 @@ export function ThemeProvider(props: ThemeProviderProps) {
     // add the browser theme color as a css variable
     document.documentElement.style.setProperty(
       "--" + prefix + "browser_theme_color",
-      themes[currentTheme()].config.browser_theme_color
+      themes[theme()].config.browser_theme_color
     );
 
     // find the stp-inverter stylesheet and edit it
     if (systemThemesCorrect) {
       let invertStylesheet = document.querySelector("#stp-inverter") as HTMLElement;
       if (invertStylesheet) {
-        let currentlyDark = currentTheme() == system_theme_config.dark;
-        let currentlyLight = currentTheme() == system_theme_config.light;
+        let currentlyDark = theme() == system_theme_config.dark;
+        let currentlyLight = theme() == system_theme_config.light;
 
         if (currentlyDark) {
           invertStylesheet.innerText =
@@ -218,39 +221,39 @@ export function ThemeProvider(props: ThemeProviderProps) {
   function toggleTheme(nextTheme: string) {
     if (nextTheme == SYSTEM_THEME_KEY) {
       setUseSystem(true);
-      setTheme(currentSystem());
+      values.setTheme(currentSystem());
     } else {
       setUseSystem(false);
-      setOtherTheme(currentTheme());
-      setTheme(nextTheme);
+      setOtherTheme(theme());
+      values.setTheme(nextTheme);
     }
     setDropdownOpen(false);
   }
 
   return (
-    <div class={styles.component + " " + styles[menu_placement]} id={props.id}>
+    <div class={styles.component + " " + styles[menu_placement]} id={values.id}>
       <div
         class={styles.button + (dropdownOpen() ? " " + styles.open : "")}
         onMouseDown={multiToggle ? () => setDropdownOpen(true) : () => toggleTheme(otherTheme())}
       >
         {dropdownOpen() ? (
           <span class={styles.icon}>{CHEVRON_UP_ICON}</span>
-        ) : themeHasBase64Icon(themes[multiToggle ? currentTheme() : otherTheme()]) ? (
+        ) : themeHasBase64Icon(themes[multiToggle ? theme() : otherTheme()]) ? (
           <span
             class={styles.icon}
-            innerHTML={atob(themes[multiToggle ? currentTheme() : otherTheme()].config.icon)}
+            innerHTML={atob(themes[multiToggle ? theme() : otherTheme()].config.icon)}
           />
         ) : (
           <span class={styles.icon}>{UNKNOWN_ICON}</span>
         )}
-        {props.label && <span class={styles.text}>{props.label}</span>}
+        {values.label && <span class={styles.text}>{values.label}</span>}
       </div>
       {dropdownOpen() && (
         <Dropdown
           styles={styles}
           allowSystemTheme={systemThemesCorrect}
           themes={themes}
-          activeTheme={useSystem() ? SYSTEM_THEME_KEY : currentTheme()}
+          activeTheme={useSystem() ? SYSTEM_THEME_KEY : theme()}
           toggleTheme={toggleTheme}
           setDropdownOpen={setDropdownOpen}
         />
