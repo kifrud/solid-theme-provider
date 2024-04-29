@@ -18,8 +18,8 @@
     "prefers-color-scheme"
   ],
   "type": "module",
-  "main": "dist/index.jsx",
-  "module": "dist/index.jsx",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "types/index.d.ts",
   "files": [
     "dist",
