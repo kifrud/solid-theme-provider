@@ -1,4 +1,3 @@
-export { For } from "solid-js";
 export {
   SystemThemesObject,
   ThemeConfig,
@@ -9,4 +8,4 @@ export {
   ThemesObject,
 } from "./lib/types";
 export { Dropdown } from "./Dropdown";
-export { ThemeProvider, currentTheme, setTheme } from "./ThemeProvider";
+export { ThemeProvider, useThemeContext } from "./ThemeProvider";

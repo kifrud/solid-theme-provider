@@ -1,13 +1,13 @@
 {
   "name": "@kifrud/solid-theme-provider",
   "description": "Lightweight and customizable theme handler for Solid JS",
-  "author": "Jacob Kofron",
+  "author": "kifrud",
   "license": "MIT",
-  "version": "0.9.1",
-  "homepage": "https://github.com/gnomical/solid-theme-provider#readme",
+  "version": "0.9.2",
+  "homepage": "https://github.com/kifrud/solid-theme-provider",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gnomical/solid-theme-provider.git"
+    "url": "https://github.com/kifrud/solid-theme-provider.git"
   },
   "keywords": [
     "solid",
@@ -50,5 +50,8 @@
   },
   "peerDependencies": {
     "solid-js": "^1.8.4"
+  },
+  "dependencies": {
+    "@solid-primitives/storage": "^3.5.0"
   }
 }

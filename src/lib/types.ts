@@ -1,4 +1,4 @@
-import { Accessor, Setter } from "solid-js";
+import { Accessor, ParentComponent, Setter } from "solid-js";
 
 export type ThemeConfig = {
   icon: string;
@@ -28,7 +28,7 @@ export type ThemesConfigObject = {
   themes: ThemesObject;
 };
 
-export type ThemeProviderProps = {
+export interface ThemeProviderProps  {
   calculate_variants?: (value: string, variable: string) => ThemeVars;
   default?: string;
   id?: string;
@@ -39,4 +39,4 @@ export type ThemeProviderProps = {
   menu_placement?: "ne" | "se" | "sw" | "nw";
   updateTheme?: (value: string) => void | Setter<string>;
   theme?: Accessor<string> | string;
-};
+}

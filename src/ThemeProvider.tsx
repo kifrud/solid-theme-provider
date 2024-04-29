@@ -1,7 +1,15 @@
-import { createEffect, createMemo, createSignal, mergeProps } from "solid-js";
+import {
+  ParentComponent,
+  createContext,
+  createEffect,
+  createMemo,
+  createSignal,
+  mergeProps,
+  useContext,
+} from "solid-js";
 import fallbackStyles from "./fallbacks.module.scss";
 import fallbackThemes from "./fallbacks.themes.json";
-import { SystemThemesObject, ThemeProviderProps, ThemesObject } from "./lib/types";
+import { SystemThemesObject, ThemeObject, ThemeProviderProps, ThemesObject } from "./lib/types";
 import {
   CHEVRON_UP_ICON,
   SYSTEM_THEME_CONFIG_KEY,
@@ -10,8 +18,17 @@ import {
 } from "./lib/constants";
 import { themeHasBase64Icon } from "./lib/helpers";
 import { Dropdown } from "./Dropdown";
+import { makePersisted } from "@solid-primitives/storage";
 
-export const [currentTheme, setTheme] = createSignal("initializing");
+interface ThemeState {
+  get theme(): string;
+  setTheme(value: string): void;
+  get themeObject(): ThemeObject;
+}
+
+const ThemeContext = createContext({} as ThemeState);
+
+export const useThemeContext = () => useContext(ThemeContext);
 
 const calculate_variants = (name: string, value: string) => {
   //if the current value is a hex color - add complementary transparencies
@@ -29,7 +46,9 @@ const calculate_variants = (name: string, value: string) => {
   return {};
 };
 
-export function ThemeProvider(props: ThemeProviderProps) {
+export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
+  const [currentTheme, setTheme] = makePersisted(createSignal("initializing"));
+
   const values = mergeProps({ theme: currentTheme, setTheme: setTheme }, props);
 
   const theme = createMemo(() =>
@@ -230,34 +249,48 @@ export function ThemeProvider(props: ThemeProviderProps) {
     setDropdownOpen(false);
   }
 
-  return (
-    <div class={styles.component + " " + styles[menu_placement]} id={values.id}>
-      <div
-        class={styles.button + (dropdownOpen() ? " " + styles.open : "")}
-        onMouseDown={multiToggle ? () => setDropdownOpen(true) : () => toggleTheme(otherTheme())}
-      >
-        {dropdownOpen() ? (
-          <span class={styles.icon}>{CHEVRON_UP_ICON}</span>
-        ) : themeHasBase64Icon(themes[multiToggle ? theme() : otherTheme()]) ? (
-          <span
-            class={styles.icon}
-            innerHTML={atob(themes[multiToggle ? theme() : otherTheme()].config.icon)}
-          />
-        ) : (
-          <span class={styles.icon}>{UNKNOWN_ICON}</span>
-        )}
-        {values.label && <span class={styles.text}>{values.label}</span>}
-      </div>
-      {dropdownOpen() && (
-        <Dropdown
-          styles={styles}
-          allowSystemTheme={systemThemesCorrect}
-          themes={themes}
-          activeTheme={useSystem() ? SYSTEM_THEME_KEY : theme()}
-          toggleTheme={toggleTheme}
-          setDropdownOpen={setDropdownOpen}
-        />
-      )}
-    </div>
-  );
-}
+  const state: ThemeState = {
+    get theme() {
+      return theme();
+    },
+    setTheme(value) {
+      toggleTheme(value);
+    },
+    get themeObject() {
+      return themes[theme()];
+    },
+  };
+
+  return <ThemeContext.Provider value={state}>{props.children}</ThemeContext.Provider>;
+
+  // return (
+  //   <div class={styles.component + " " + styles[menu_placement]} id={values.id}>
+  //     <div
+  //       class={styles.button + (dropdownOpen() ? " " + styles.open : "")}
+  //       onMouseDown={multiToggle ? () => setDropdownOpen(true) : () => toggleTheme(otherTheme())}
+  //     >
+  //       {dropdownOpen() ? (
+  //         <span class={styles.icon}>{CHEVRON_UP_ICON}</span>
+  //       ) : themeHasBase64Icon(themes[multiToggle ? theme() : otherTheme()]) ? (
+  //         <span
+  //           class={styles.icon}
+  //           innerHTML={atob(themes[multiToggle ? theme() : otherTheme()].config.icon)}
+  //         />
+  //       ) : (
+  //         <span class={styles.icon}>{UNKNOWN_ICON}</span>
+  //       )}
+  //       {values.label && <span class={styles.text}>{values.label}</span>}
+  //     </div>
+  //     {dropdownOpen() && (
+  //       <Dropdown
+  //         styles={styles}
+  //         allowSystemTheme={systemThemesCorrect}
+  //         themes={themes}
+  //         activeTheme={useSystem() ? SYSTEM_THEME_KEY : theme()}
+  //         toggleTheme={toggleTheme}
+  //         setDropdownOpen={setDropdownOpen}
+  //       />
+  //     )}
+  //   </div>
+  // );
+};
