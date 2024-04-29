@@ -1,4 +1,4 @@
-import { createEffect, For, onCleanup } from "solid-js";
+import { createEffect, For, onCleanup, Setter } from "solid-js";
 import {
   SYSTEM_THEME_CONFIG_KEY,
   SYSTEM_THEME_ICON,
@@ -6,14 +6,15 @@ import {
   UNKNOWN_ICON,
 } from "./lib/constants";
 import { themeHasBase64Icon } from "./lib/helpers";
+import { Styles, ThemesObject } from "./lib/types";
 
 type DropdownProps = {
-  styles: any;
+  styles: Styles;
   activeTheme: string;
   allowSystemTheme?: boolean;
-  toggleTheme: any;
-  themes: any;
-  setDropdownOpen: any;
+  toggleTheme: (nextTheme: string) => void;
+  themes: ThemesObject;
+  setDropdownOpen: Setter<boolean>;
 };
 
 export function Dropdown(props: DropdownProps) {
@@ -21,9 +22,9 @@ export function Dropdown(props: DropdownProps) {
   const allowSystemTheme = props.allowSystemTheme || false;
 
   // handle global click events
-  let containerRef: any;
+  let containerRef: HTMLDivElement | undefined;
   const closeDropdown = (e: Event) => {
-    if (!containerRef.contains(e.target)) props.setDropdownOpen(false);
+    if (!containerRef?.contains(e.target as Node)) props.setDropdownOpen(false);
   };
 
   createEffect(() => {

@@ -1,5 +1,7 @@
 import { Accessor, ParentComponent, Setter } from "solid-js";
 
+export type Styles = { [className: string]: string };
+
 export type ThemeConfig = {
   icon: string;
   browser_theme_color: string;
@@ -28,13 +30,13 @@ export type ThemesConfigObject = {
   themes: ThemesObject;
 };
 
-export interface ThemeProviderProps  {
+export interface ThemeProviderProps {
   calculate_variants?: (value: string, variable: string) => ThemeVars;
   default?: string;
   id?: string;
   label?: string;
   prefix?: string;
-  styles?: any;
+  styles?: Styles;
   themes?: ThemesConfigObject;
   menu_placement?: "ne" | "se" | "sw" | "nw";
   updateTheme?: (value: string) => void | Setter<string>;
