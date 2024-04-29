@@ -47,7 +47,7 @@ const calculate_variants = (name: string, value: string) => {
 };
 
 export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
-  const [currentTheme, setTheme] = makePersisted(createSignal("initializing"));
+  const [currentTheme, setTheme] = makePersisted(createSignal<string | null>(null));
 
   const values = mergeProps({ theme: currentTheme, setTheme: setTheme }, props);
 
@@ -81,6 +81,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
   const systemThemeIsDark = window.matchMedia("(prefers-color-scheme: dark)");
   // initialize the current theme
   createEffect(() => {
+    if (theme()) return;
     values.setTheme(
       values.default ||
         (systemThemesCorrect
@@ -118,7 +119,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
         if (e.matches) {
           nextTheme = system_theme_config.dark;
         }
-        setOtherTheme(theme());
+        setOtherTheme(theme() as string);
         values.setTheme(nextTheme);
       }
       if (e.matches) {
@@ -186,11 +187,15 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
     // TODO: loop through properties of last theme and remove any that don't exist in the next theme
 
     // loop through the theme vars and inject them to the :root style element
-    Object.keys(themes[theme()].vars).forEach(name => {
-      document.documentElement.style.setProperty("--" + prefix + name, themes[theme()].vars[name]);
+    if (!theme()) console.warn("Theme is null.");
+    Object.keys(themes[theme() as string].vars).forEach(name => {
+      document.documentElement.style.setProperty(
+        "--" + prefix + name,
+        themes[theme() as string].vars[name]
+      );
 
       // calculate any variants and inject them to the :root style element
-      let variants = custom_variants(name, themes[theme()].vars[name]);
+      let variants = custom_variants(name, themes[theme() as string].vars[name]);
       Object.keys(variants).forEach(variant => {
         document.documentElement.style.setProperty("--" + prefix + variant, variants[variant]);
       });
@@ -200,15 +205,15 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
     // <meta name="theme-color" content="#FFFFFF"></meta>
     let theme_meta = document.querySelector('meta[name="theme-color"]');
     if (
-      themes[theme()].hasOwnProperty("config") &&
-      themes[theme()].config.hasOwnProperty("browser_theme_color")
+      themes[theme() as string].hasOwnProperty("config") &&
+      themes[theme() as string].config.hasOwnProperty("browser_theme_color")
     ) {
       if (!theme_meta) {
         theme_meta = document.createElement("meta");
         theme_meta.setAttribute("name", "theme-color");
         document.getElementsByTagName("head")[0].appendChild(theme_meta);
       }
-      theme_meta.setAttribute("content", themes[theme()].config.browser_theme_color);
+      theme_meta.setAttribute("content", themes[theme() as string].config.browser_theme_color);
     } else {
       if (theme_meta) theme_meta.remove();
     }
@@ -216,7 +221,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
     // add the browser theme color as a css variable
     document.documentElement.style.setProperty(
       "--" + prefix + "browser_theme_color",
-      themes[theme()].config.browser_theme_color
+      themes[theme() as string].config.browser_theme_color
     );
 
     // find the stp-inverter stylesheet and edit it
@@ -243,7 +248,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
       values.setTheme(currentSystem());
     } else {
       setUseSystem(false);
-      setOtherTheme(theme());
+      setOtherTheme(theme() as string);
       values.setTheme(nextTheme);
     }
     setDropdownOpen(false);
@@ -251,13 +256,13 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
 
   const state: ThemeState = {
     get theme() {
-      return theme();
+      return theme() as string;
     },
     setTheme(value) {
       toggleTheme(value);
     },
     get themeObject() {
-      return themes[theme()];
+      return themes[theme() as string];
     },
   };
 

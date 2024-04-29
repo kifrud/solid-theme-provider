@@ -18,10 +18,10 @@ const plugins = [
 ];
 
 export default {
-  input: "src/index.ts",
+  input: "src/index.tsx",
   output: [
     {
-      file: "dist/index.js",
+      file: "dist/index.jsx",
       format: "es",
     },
   ],
