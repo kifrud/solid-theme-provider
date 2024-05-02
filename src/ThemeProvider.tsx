@@ -7,17 +7,17 @@ import {
   mergeProps,
   useContext,
 } from "solid-js";
-import fallbackStyles from "./fallbacks.module.scss";
+// import fallbackStyles from "./fallbacks.module.scss";
 import fallbackThemes from "./fallbacks.themes.json";
 import { SystemThemesObject, ThemeObject, ThemeProviderProps, ThemesObject } from "./lib/types";
 import {
-  CHEVRON_UP_ICON,
+  // CHEVRON_UP_ICON,
   SYSTEM_THEME_CONFIG_KEY,
   SYSTEM_THEME_KEY,
-  UNKNOWN_ICON,
+  // UNKNOWN_ICON,
 } from "./lib/constants";
-import { themeHasBase64Icon } from "./lib/helpers";
-import { Dropdown } from "./Dropdown";
+// import { themeHasBase64Icon } from "./lib/helpers";
+// import { Dropdown } from "./Dropdown";
 import { makePersisted } from "@solid-primitives/storage";
 
 interface ThemeState {
@@ -68,12 +68,12 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
     system_theme_config.hasOwnProperty("light") &&
     themes.hasOwnProperty(system_theme_config.dark) &&
     themes.hasOwnProperty(system_theme_config.light);
-  const styles = values.styles || fallbackStyles;
-  const multiToggle = themeKeys.length > 2;
-  const menu_placement = values.menu_placement || "se";
+  // const styles = values.styles || fallbackStyles;
+  // const multiToggle = themeKeys.length > 2;
+  // const menu_placement = values.menu_placement || "se";
   const custom_variants = values.calculate_variants || calculate_variants;
 
-  const [dropdownOpen, setDropdownOpen] = createSignal(false);
+  // const [dropdownOpen, setDropdownOpen] = createSignal(false);
   const [useSystem, setUseSystem] = createSignal(
     values.default ? false : systemThemesCorrect ? true : false
   );
@@ -251,7 +251,7 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
       setOtherTheme(theme() as string);
       values.setTheme(nextTheme);
     }
-    setDropdownOpen(false);
+    // setDropdownOpen(false);
   }
 
   const state: ThemeState = {
@@ -267,35 +267,4 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
   };
 
   return <ThemeContext.Provider value={state}>{props.children}</ThemeContext.Provider>;
-
-  // return (
-  //   <div class={styles.component + " " + styles[menu_placement]} id={values.id}>
-  //     <div
-  //       class={styles.button + (dropdownOpen() ? " " + styles.open : "")}
-  //       onMouseDown={multiToggle ? () => setDropdownOpen(true) : () => toggleTheme(otherTheme())}
-  //     >
-  //       {dropdownOpen() ? (
-  //         <span class={styles.icon}>{CHEVRON_UP_ICON}</span>
-  //       ) : themeHasBase64Icon(themes[multiToggle ? theme() : otherTheme()]) ? (
-  //         <span
-  //           class={styles.icon}
-  //           innerHTML={atob(themes[multiToggle ? theme() : otherTheme()].config.icon)}
-  //         />
-  //       ) : (
-  //         <span class={styles.icon}>{UNKNOWN_ICON}</span>
-  //       )}
-  //       {values.label && <span class={styles.text}>{values.label}</span>}
-  //     </div>
-  //     {dropdownOpen() && (
-  //       <Dropdown
-  //         styles={styles}
-  //         allowSystemTheme={systemThemesCorrect}
-  //         themes={themes}
-  //         activeTheme={useSystem() ? SYSTEM_THEME_KEY : theme()}
-  //         toggleTheme={toggleTheme}
-  //         setDropdownOpen={setDropdownOpen}
-  //       />
-  //     )}
-  //   </div>
-  // );
 };
