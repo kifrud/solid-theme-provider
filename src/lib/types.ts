@@ -34,6 +34,7 @@ export interface ThemeProviderProps {
   calculate_variants?: (value: string, variable: string) => ThemeVars;
   default?: string;
   id?: string;
+  name?: string
   label?: string;
   prefix?: string;
   styles?: Styles;

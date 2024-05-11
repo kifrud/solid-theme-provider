@@ -47,7 +47,9 @@ const calculate_variants = (name: string, value: string) => {
 };
 
 export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
-  const [currentTheme, setTheme] = makePersisted(createSignal<string | null>(null));
+  const [currentTheme, setTheme] = makePersisted(createSignal<string | null>(null), {
+    name: props.name ?? "theme",
+  });
 
   const values = mergeProps({ theme: currentTheme, setTheme: setTheme }, props);
 
