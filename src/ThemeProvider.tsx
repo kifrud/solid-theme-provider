@@ -7,17 +7,12 @@ import {
   mergeProps,
   useContext,
 } from "solid-js";
-// import fallbackStyles from "./fallbacks.module.scss";
 import fallbackThemes from "./fallbacks.themes.json";
 import { SystemThemesObject, ThemeObject, ThemeProviderProps, ThemesObject } from "./lib/types";
 import {
-  // CHEVRON_UP_ICON,
   SYSTEM_THEME_CONFIG_KEY,
   SYSTEM_THEME_KEY,
-  // UNKNOWN_ICON,
 } from "./lib/constants";
-// import { themeHasBase64Icon } from "./lib/helpers";
-// import { Dropdown } from "./Dropdown";
 import { makePersisted } from "@solid-primitives/storage";
 
 interface ThemeState {
@@ -70,12 +65,8 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
     system_theme_config.hasOwnProperty("light") &&
     themes.hasOwnProperty(system_theme_config.dark) &&
     themes.hasOwnProperty(system_theme_config.light);
-  // const styles = values.styles || fallbackStyles;
-  // const multiToggle = themeKeys.length > 2;
-  // const menu_placement = values.menu_placement || "se";
   const custom_variants = values.calculate_variants || calculate_variants;
 
-  // const [dropdownOpen, setDropdownOpen] = createSignal(false);
   const [useSystem, setUseSystem] = createSignal(
     values.default ? false : systemThemesCorrect ? true : false
   );
@@ -253,7 +244,6 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
       setOtherTheme(theme() as string);
       values.setTheme(nextTheme);
     }
-    // setDropdownOpen(false);
   }
 
   const state: ThemeState = {
