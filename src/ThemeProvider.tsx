@@ -9,10 +9,7 @@ import {
 } from "solid-js";
 import fallbackThemes from "./fallbacks.themes.json";
 import { SystemThemesObject, ThemeObject, ThemeProviderProps, ThemesObject } from "./lib/types";
-import {
-  SYSTEM_THEME_CONFIG_KEY,
-  SYSTEM_THEME_KEY,
-} from "./lib/constants";
+import { SYSTEM_THEME_CONFIG_KEY, SYSTEM_THEME_KEY } from "./lib/constants";
 import { makePersisted } from "@solid-primitives/storage";
 
 interface ThemeState {
@@ -168,10 +165,6 @@ export const ThemeProvider: ParentComponent<ThemeProviderProps> = props => {
         );
       } else if (!settings.hasOwnProperty("config")) {
         console.warn(`The '${themeName}' theme object is missing its 'config' property.`);
-      } else if (!settings.config.hasOwnProperty("icon")) {
-        console.warn(
-          `The '${themeName}.config' object is missing its 'icon' property. A fallback placeholder is being used instead.`
-        );
       }
     }
   });

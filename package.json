@@ -3,7 +3,7 @@
   "description": "Lightweight and customizable theme handler for Solid JS",
   "author": "kifrud",
   "license": "MIT",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "homepage": "https://github.com/kifrud/solid-theme-provider",
   "repository": {
     "type": "git",
