@@ -3,7 +3,6 @@ import { Accessor, ParentComponent, Setter } from "solid-js";
 export type Styles = { [className: string]: string };
 
 export type ThemeConfig = {
-  icon: string;
   browser_theme_color: string;
 };
 
